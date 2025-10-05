@@ -1,0 +1,70 @@
+# AARC Webtools — Cursor Rules (Figma→Next.js)
+
+## Core Principles
+- Always prefer **semantic naming** over property-based names.
+- Abide by the component hierarchy: **ui → shared → features → sections → layout**. 
+- Use **TypeScript** with explicit prop interfaces.
+- Use **design tokens** from `src/lib/tokens.ts` (no hardcoded colors/spacing).
+- Use **combo classes** from `src/styles/globals.css` for repeated patterns (extract when a pattern repeats 3+ times).
+
+## Imports & Libraries
+- Import UI primitives from the **abstraction layer**: `import { Button, Card, Input } from '@/components/ui'`.
+- The underlying library (shadcn or HeroUI) is selected in `components/ui/index.ts`. Do not import directly from libraries.
+
+## Figma MCP Workflow
+- Before generation, **fetch latest** design data via the **Figma MCP server**.
+- Translate Figma layers to **semantic components**:
+  - Examples: `HeroSection`, `PricingTable`, `NavigationMenu`, `OptionPricerPanel`.
+  - Ignore generic names (Frame/Group/Rectangle). Use context/purpose. 
+- Extract colors/spacing/typography to **`tokens.ts`**; prefer **HSL** and CSS vars.
+- Map Auto Layout → Tailwind flex/grid; padding/gap → `p-*/gap-*`; type styles → typography tokens.
+
+## Component Structure
+- Files in `kebab-case` (e.g., `hero-section.tsx`); components in `PascalCase`.
+- Place components by intent:
+  - UI primitives → `components/ui/`
+  - Sections → `components/sections/`
+  - Features (domain) → `components/features/`
+  - Layout → `components/layout/`
+  - Shared → `components/shared/`
+- Use **shadcn** or **HeroUI** components before creating customs.
+- Include **responsive** classes: base → mobile; `md:`/`lg:` for larger breakpoints.
+
+## Styling Priority
+1) **Design Tokens** (`tokens.ts`)  
+2) **Combo Classes** (`globals.css`)  
+3) **Tailwind utilities** (one-offs)  
+4) **Component props** (e.g., `variant`, `size`, `color`)
+
+## Example Generation Prompt (Good)
+“Generate **PricingTable** from Figma frame ‘Pricing — Table v2’:
+- Import primitives from `@/components/ui`
+- Use tokens for colors/spacing/typography
+- Extract repeated patterns into combo classes if used 3+ times
+- Type all props (plan name, price, features[])
+- Responsive: 1 col mobile, 2 col tablet, 3 col desktop
+- Accessibility: semantic table/aria labels”
+
+## Class Naming
+- Use **semantic** class names scoped by component:
+  - `pricing-table`, `pricing-card`, `pricing-feature-list`, `hero-section`, `nav-menu`, `option-pricer-form`
+- Avoid property-based names (`flex-col-center`, `blue-button`, `grid3x3`).
+
+## Strapi Integration Hooks
+- When a component is content-driven, add **data props** shaped like Strapi responses.
+- Avoid CMS-specific logic in UI; fetch data in **server components** or **loaders**.
+- For publish events, emit a **revalidation webhook** to Vercel (`/api/revalidate`).
+
+## Accessibility & Performance
+- Use semantic HTML (`nav/main/section/article`), labels for icon buttons, alt text, focus order.
+- Use `next/image`, loading/error states, and avoid client components unless needed.
+
+## Checks (must pass)
+- [ ] Semantic component & class names
+- [ ] Tokens used (no hardcoded hex/rgb)
+- [ ] Combo classes used where repeated
+- [ ] shadcn/HeroUI primitives leveraged
+- [ ] Responsive breakpoints included
+- [ ] TypeScript props defined
+- [ ] A11y attributes present
+
